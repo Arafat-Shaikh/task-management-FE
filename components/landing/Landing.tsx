@@ -15,13 +15,6 @@ const Landing = () => {
   const router = useRouter();
   const [userId, setUserId] = useRecoilState(userIdState);
 
-  useEffect(() => {
-    const id = localStorage.getItem("user-unique-id");
-    if (id) {
-      setUserId(id);
-    }
-  }, []);
-
   return (
     <div className="flex flex-col">
       <main className="flex-1">

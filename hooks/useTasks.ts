@@ -16,7 +16,7 @@ const useTasks = () => {
 
   useEffect(() => {
     async function getTasks() {
-      const response = await axios.get("http://localhost:8080/api/v1/task");
+      const response = await axios.get("http://localhost:8080/api/task");
       const tasks = response.data;
       if (tasks) {
         setTasks(tasks);

@@ -44,7 +44,7 @@ const SignIn = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/v1/signin",
+        "http://localhost:8080/api/user/signin",
         userDetails,
         {
           withCredentials: true,

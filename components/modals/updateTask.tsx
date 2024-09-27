@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,86 +30,50 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import useAddTaskModal from "@/hooks/useAddTaskModal";
-import { title } from "process";
-import toast from "react-hot-toast";
-import axios from "axios";
-import { useRecoilState } from "recoil";
-import { taskState } from "@/recoilAtoms/taskAtom";
-
-enum StatusType {
-  ToDo = "To do",
-  InProgress = "In Progress",
-  Completed = "Completed",
-}
-
-enum PriorityType {
-  Low = "Low",
-  Medium = "Medium",
-  High = "High",
-}
 
 type Task = {
   title: string;
   description: string;
-  status: string | undefined;
-  priority: string | undefined;
+  status: string;
+  priority: string;
   dueDate: Date | undefined;
 };
 
-const AddTaskModal = () => {
-  const addTaskModal = useAddTaskModal();
-  const [isLoading, setIsLoading] = useState(false);
-  const [newTask, setNewTask] = useState<Task>({
+type UpdateTaskDialogProps = {
+  onUpdate: (updatedTask: Task) => void;
+  isOpen: boolean;
+  setOnClose: () => void;
+};
+
+export default function UpdateTaskDialog({
+  onUpdate,
+  isOpen,
+  setOnClose,
+}: UpdateTaskDialogProps) {
+  const [updatedTask, setUpdatedTask] = useState<any>({
     title: "",
     description: "",
     status: "",
     priority: "",
     dueDate: undefined,
   });
-  const [tasks, setTasks] = useRecoilState(taskState);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) {
-      return null;
-    }
-
-    if (!newTask.status || !newTask.priority || !newTask.dueDate) {
-      toast.error("All details required");
-    }
-
-    setIsLoading(true);
-
-    try {
-      const response = await axios.post(
-        "http://localhost:8080/api/task",
-        newTask,
-        { withCredentials: true }
-      );
-
-      if (response.data) {
-        setTasks((prevTasks: any) => [response.data, ...prevTasks]);
-      }
-      addTaskModal.onClose();
-    } catch (err) {
-      console.log(err);
-      toast.error("Something went wrong");
-    }
-
-    setIsLoading(false);
+    onUpdate(updatedTask);
+    setOnClose();
   };
 
   return (
-    <Dialog open={addTaskModal.isOpen} onOpenChange={addTaskModal.onClose}>
+    <Dialog open={isOpen} onOpenChange={setOnClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Task</DialogTitle>
+          <DialogTitle>Edit Task</DialogTitle>
           <DialogDescription>
-            Enter the details for the new task
+            Make changes to your task here. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={(e) => handleSubmit(e)}>
+        <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="title" className="text-right">
@@ -117,12 +81,11 @@ const AddTaskModal = () => {
               </Label>
               <Input
                 id="title"
-                value={newTask.title}
+                value={updatedTask.title}
                 onChange={(e) =>
-                  setNewTask({ ...newTask, title: e.target.value })
+                  setUpdatedTask({ ...updatedTask, title: e.target.value })
                 }
                 className="col-span-3"
-                required
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -131,12 +94,14 @@ const AddTaskModal = () => {
               </Label>
               <Textarea
                 id="description"
-                value={newTask.description}
+                value={updatedTask.description}
                 onChange={(e) =>
-                  setNewTask({ ...newTask, description: e.target.value })
+                  setUpdatedTask({
+                    ...updatedTask,
+                    description: e.target.value,
+                  })
                 }
                 className="col-span-3"
-                required
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -144,22 +109,18 @@ const AddTaskModal = () => {
                 Status
               </Label>
               <Select
-                value={newTask.status}
+                value={updatedTask.status}
                 onValueChange={(value: "To Do" | "In Progress" | "Completed") =>
-                  setNewTask({ ...newTask, status: value })
+                  setUpdatedTask({ ...updatedTask, status: value })
                 }
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={StatusType.ToDo}>To Do</SelectItem>
-                  <SelectItem value={StatusType.InProgress}>
-                    In Progress
-                  </SelectItem>
-                  <SelectItem value={StatusType.Completed}>
-                    Completed
-                  </SelectItem>
+                  <SelectItem value="To Do">To Do</SelectItem>
+                  <SelectItem value="In Progress">In Progress</SelectItem>
+                  <SelectItem value="Completed">Completed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -168,18 +129,18 @@ const AddTaskModal = () => {
                 Priority
               </Label>
               <Select
-                value={newTask.priority}
-                onValueChange={(value: PriorityType) =>
-                  setNewTask({ ...newTask, priority: value })
+                value={updatedTask.priority}
+                onValueChange={(value: "Low" | "Medium" | "High") =>
+                  setUpdatedTask({ ...updatedTask, priority: value })
                 }
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a priority" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={PriorityType.Low}>Low</SelectItem>
-                  <SelectItem value={PriorityType.Medium}>Medium</SelectItem>
-                  <SelectItem value={PriorityType.High}>High</SelectItem>
+                  <SelectItem value="Low">Low</SelectItem>
+                  <SelectItem value="Medium">Medium</SelectItem>
+                  <SelectItem value="High">High</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -193,12 +154,12 @@ const AddTaskModal = () => {
                     variant={"outline"}
                     className={cn(
                       "col-span-3 justify-start text-left font-normal",
-                      !newTask.dueDate && "text-muted-foreground"
+                      !updatedTask.dueDate && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {newTask.dueDate ? (
-                      format(newTask.dueDate, "PPP")
+                    {updatedTask.dueDate ? (
+                      format(updatedTask.dueDate, "PPP")
                     ) : (
                       <span>Pick a date</span>
                     )}
@@ -207,9 +168,9 @@ const AddTaskModal = () => {
                 <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
-                    selected={newTask.dueDate}
+                    selected={updatedTask.dueDate}
                     onSelect={(date) =>
-                      setNewTask({ ...newTask, dueDate: date })
+                      setUpdatedTask({ ...updatedTask, dueDate: date })
                     }
                     initialFocus
                   />
@@ -218,12 +179,10 @@ const AddTaskModal = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Save Task</Button>
+            <Button type="submit">Save changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   );
-};
-
-export default AddTaskModal;
+}

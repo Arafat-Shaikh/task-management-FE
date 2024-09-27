@@ -13,7 +13,6 @@ const Modals = () => {
       <SignIn />
       <SignUp />
       <AddTaskModal />
-      <DeleteModal />
     </>
   );
 };

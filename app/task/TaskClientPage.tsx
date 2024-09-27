@@ -16,7 +16,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import useTasks from "@/hooks/useTasks";
 import { RecoilState, useRecoilState, useRecoilValue } from "recoil";
 import { taskState } from "@/recoilAtoms/taskAtom";
 import axios from "axios";
@@ -29,6 +28,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import useUserId from "@/hooks/useUserId";
+import toast from "react-hot-toast";
+import UpdateTaskDialog from "@/components/modals/updateTask";
 
 type Task = {
   id?: string;
@@ -41,9 +43,11 @@ type Task = {
 };
 
 const TaskListPage = () => {
-  const baseUrl = "http://localhost:8080/api/v1/task";
-  const [tasks, setTasks] = useRecoilState(taskState);
+  const baseUrl = "http://localhost:8080/api/task";
+  const [isUpdateDialog, setIsUpdateDialog] = useState(false);
+  const [taskToUpdateId, setTaskToUpdateId] = useState<string | "">("");
   const userId = useRecoilValue(userIdState);
+  const [tasks, setTasks] = useRecoilState(taskState);
   const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState<{ start: string; end: string }>({
@@ -63,7 +67,7 @@ const TaskListPage = () => {
   useEffect(() => {
     async function getTasks() {
       if (!userId) {
-        return;
+        router.push("/");
       }
       try {
         const params = new URLSearchParams();
@@ -101,6 +105,7 @@ const TaskListPage = () => {
         }
       } catch (error) {
         console.log(error);
+        toast.error("Something went wrong");
       }
     }
     getTasks();
@@ -111,6 +116,37 @@ const TaskListPage = () => {
       return router.push("/");
     }
   }, []);
+
+  async function handleEditTask(updateTask: any) {
+    console.log(updateTask.dueDate);
+    console.log(new Date(updateTask.dueDate));
+    if (isLoading) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await axios.put(
+        `${baseUrl}/${taskToUpdateId}`,
+        updateTask,
+        {
+          withCredentials: true,
+        }
+      );
+      if (response.data) {
+        let copyTasks = [...tasks];
+        let latestTask = copyTasks.map((task) =>
+          task.id === taskToUpdateId ? response.data : task
+        );
+        setTasks(latestTask);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong while delete the task");
+    }
+    setIsLoading(false);
+  }
 
   function formatDate(isoDateString: any) {
     const date = new Date(isoDateString);
@@ -148,6 +184,7 @@ const TaskListPage = () => {
       setIsLoading(false);
     } catch (error) {
       console.log(error);
+      toast.error("Something went wrong while delete the task");
     }
     setIsLoading(false);
   }
@@ -360,6 +397,10 @@ const TaskListPage = () => {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
+                          onClick={() => {
+                            setIsUpdateDialog(true);
+                            setTaskToUpdateId(task.id);
+                          }}
                           variant="ghost"
                           size="sm"
                           className="transition-colors duration-300 hover:bg-gray-100"
@@ -393,6 +434,15 @@ const TaskListPage = () => {
               </div>
             </div>
           ))}
+          <div>
+            {
+              <UpdateTaskDialog
+                isOpen={isUpdateDialog}
+                setOnClose={() => setIsUpdateDialog(false)}
+                onUpdate={handleEditTask}
+              />
+            }
+          </div>
         </div>
       </div>
     </div>

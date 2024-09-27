@@ -18,6 +18,7 @@ import useSignupModal from "@/hooks/useSignupModal";
 import { useRecoilState } from "recoil";
 import { userIdState } from "@/recoilAtoms/userAtom";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 interface SignUpType {
   name: string;
@@ -46,22 +47,27 @@ const SignUp = () => {
 
     setIsLoading(true);
 
-    const response = await axios.post(
-      "http://localhost:8080/api/v1/signup",
-      userDetails,
-      { withCredentials: true }
-    );
-    if (!response.data) {
-      alert("Something went wrong while Signing up");
-    }
-    const data = response.data;
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/user/signup",
+        userDetails,
+        { withCredentials: true }
+      );
+      if (!response.data) {
+        alert("Something went wrong while Signing up");
+      }
+      const data = response.data;
 
-    if (data.userId) {
-      localStorage.setItem("user-unique-id", data.userId);
-      setUserId(data.userId);
-      signUpModal.onClose();
-      router.push("/task");
+      if (data.userId) {
+        localStorage.setItem("user-unique-id", data.userId);
+        setUserId(data.userId);
+        signUpModal.onClose();
+        router.push("/task");
+      }
+    } catch (error) {
+      toast.error("Something went wrong");
     }
+
     setIsLoading(false);
   };
 
