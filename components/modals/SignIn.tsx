@@ -18,6 +18,7 @@ import useSignupModal from "@/hooks/useSignupModal";
 import { useRecoilState } from "recoil";
 import { userIdState } from "@/recoilAtoms/userAtom";
 import axios from "axios";
+import { BASE_URL } from "@/lib/utils";
 
 interface SignInType {
   email: string;
@@ -44,7 +45,7 @@ const SignIn = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/user/signin",
+        `${BASE_URL}/api/user/signin`,
         userDetails,
         {
           withCredentials: true,
@@ -63,10 +64,6 @@ const SignIn = () => {
     } catch (error) {
       console.log(error);
     }
-
-    // const response = await axios.get("http://localhost:8080/api/v1/check");
-    // const userId = response.data.message;
-    // console.log(userId);
   };
 
   return (

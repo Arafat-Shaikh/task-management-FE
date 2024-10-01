@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/popover";
 
 type Task = {
+  id?: string;
   title: string;
   description: string;
   status: string;
@@ -43,20 +44,28 @@ type UpdateTaskDialogProps = {
   onUpdate: (updatedTask: Task) => void;
   isOpen: boolean;
   setOnClose: () => void;
+  task: Task;
 };
 
 export default function UpdateTaskDialog({
+  task,
   onUpdate,
   isOpen,
   setOnClose,
 }: UpdateTaskDialogProps) {
-  const [updatedTask, setUpdatedTask] = useState<any>({
-    title: "",
-    description: "",
-    status: "",
-    priority: "",
-    dueDate: undefined,
+  const [updatedTask, setUpdatedTask] = useState<Task>({
+    title: task?.title,
+    description: task?.description,
+    status: task?.status,
+    priority: task?.priority,
+    dueDate: task?.dueDate,
   });
+
+  useEffect(() => {
+    if (task) {
+      setUpdatedTask(task);
+    }
+  }, [task]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,7 +127,7 @@ export default function UpdateTaskDialog({
                   <SelectValue placeholder="Select a status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="To Do">To Do</SelectItem>
+                  <SelectItem value="To do">To do</SelectItem>
                   <SelectItem value="In Progress">In Progress</SelectItem>
                   <SelectItem value="Completed">Completed</SelectItem>
                 </SelectContent>

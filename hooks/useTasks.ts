@@ -1,5 +1,6 @@
 "use client";
 
+import { BASE_URL } from "@/lib/utils";
 import { taskState } from "@/recoilAtoms/taskAtom";
 import { userIdState } from "@/recoilAtoms/userAtom";
 import axios from "axios";
@@ -16,7 +17,7 @@ const useTasks = () => {
 
   useEffect(() => {
     async function getTasks() {
-      const response = await axios.get("http://localhost:8080/api/task");
+      const response = await axios.get(`${BASE_URL}/api/task`);
       const tasks = response.data;
       if (tasks) {
         setTasks(tasks);

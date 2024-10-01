@@ -16,7 +16,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { RecoilState, useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { taskState } from "@/recoilAtoms/taskAtom";
 import axios from "axios";
 import { userIdState } from "@/recoilAtoms/userAtom";
@@ -28,24 +28,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import useUserId from "@/hooks/useUserId";
 import toast from "react-hot-toast";
 import UpdateTaskDialog from "@/components/modals/updateTask";
-
-type Task = {
-  id?: string;
-  title: string;
-  description: string;
-  priority: "Low" | "Medium" | "High";
-  status: "To do" | "In progress" | "Completed";
-  dueDate: string;
-  userId?: string;
-};
+import { getBorderColor, getPriorityIcon } from "@/lib/icons";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatDate, Task } from "@/lib/types";
+import { useTaskDeletion } from "@/hooks/useTaskDeletion";
+import { BASE_URL } from "@/lib/utils";
 
 const TaskListPage = () => {
-  const baseUrl = "http://localhost:8080/api/task";
   const [isUpdateDialog, setIsUpdateDialog] = useState(false);
-  const [taskToUpdateId, setTaskToUpdateId] = useState<string | "">("");
+  const { isDeleting, handleDeleteTask } = useTaskDeletion();
   const userId = useRecoilValue(userIdState);
   const [tasks, setTasks] = useRecoilState(taskState);
   const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
@@ -59,6 +52,8 @@ const TaskListPage = () => {
   const router = useRouter();
   const addTaskModal = useAddTaskModal();
   const [isLoading, setIsLoading] = useState(false);
+  const [upTask, setUpTask] = useState<Task | null>(null);
+  // const { isDeleting, handleDeleteTask } = useTaskDeletion();
 
   const handleDropdownToggle = (dropdown: string) => {
     setOpenDropdown(openDropdown === dropdown ? null : dropdown);
@@ -67,17 +62,19 @@ const TaskListPage = () => {
   useEffect(() => {
     async function getTasks() {
       if (!userId) {
-        router.push("/");
+        return;
       }
       try {
         const params = new URLSearchParams();
 
-        if (statusFilter) {
-          params.append("status", statusFilter);
-        }
-
         if (priorityFilter) {
           params.append("priority", priorityFilter);
+        } else {
+          params.delete("priority");
+        }
+
+        if (statusFilter) {
+          params.append("status", statusFilter);
         }
 
         if (dateFilter.start && dateFilter.end) {
@@ -90,10 +87,8 @@ const TaskListPage = () => {
         }
 
         const urlWithParams = params.toString()
-          ? `${baseUrl}?${params.toString()}`
-          : baseUrl;
-
-        console.log(urlWithParams);
+          ? `${BASE_URL}/api/task?${params.toString()}`
+          : `${BASE_URL}/api/task`;
 
         const response = await axios.get(urlWithParams, {
           withCredentials: true,
@@ -127,34 +122,27 @@ const TaskListPage = () => {
     setIsLoading(true);
     try {
       const response = await axios.put(
-        `${baseUrl}/${taskToUpdateId}`,
+        `${BASE_URL}/api/task/${upTask?.id}`,
         updateTask,
         {
           withCredentials: true,
         }
       );
       if (response.data) {
-        let copyTasks = [...tasks];
-        let latestTask = copyTasks.map((task) =>
-          task.id === taskToUpdateId ? response.data : task
+        console.log(upTask);
+        setTasks((prevTasks: any) =>
+          prevTasks.map((t: Task) =>
+            t.id?.toString() === upTask?.id ? updateTask : t
+          )
         );
-        setTasks(latestTask);
       }
       setIsLoading(false);
+      setIsUpdateDialog(false);
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong while delete the task");
+      toast.error("Cant update the Task");
     }
     setIsLoading(false);
-  }
-
-  function formatDate(isoDateString: any) {
-    const date = new Date(isoDateString);
-    console.log(date);
-    const day = date.getUTCDate();
-    const month = date.getUTCMonth() + 1;
-    const year = date.getUTCFullYear();
-    return `${day}/${month}/${year}`;
   }
 
   function handleRemoveFilters() {
@@ -166,28 +154,26 @@ const TaskListPage = () => {
     });
   }
 
-  async function handleDeleteTask(taskId: string) {
-    if (isLoading) {
-      return;
-    }
+  // async function handleDeleteTask(taskId: string) {
+  //   if (isLoading) {
+  //     return;
+  //   }
 
-    setIsLoading(true);
-    try {
-      const response = await axios.delete(`${baseUrl}/${taskId}`, {
-        withCredentials: true,
-      });
-      if (response.data) {
-        let copyTasks = [...tasks];
-        let latestTask = copyTasks.filter((t) => t.id !== taskId);
-        setTasks(latestTask);
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong while delete the task");
-    }
-    setIsLoading(false);
-  }
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await axios.delete(`${BASE_URL}/api/task/${taskId}`, {
+  //       withCredentials: true,
+  //     });
+  //     if (response.data) {
+  //       setTasks((prevTasks) => prevTasks.filter((t) => t.id !== taskId));
+  //     }
+  //     setIsLoading(false);
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast.error("Something went wrong while delete the task");
+  //   }
+  //   setIsLoading(false);
+  // }
 
   if (!userId) {
     return null;
@@ -229,7 +215,7 @@ const TaskListPage = () => {
   }
 
   return (
-    <div className=" -mt-4 md:mt-0 flex flex-col md:flex-row bg-gray-100 h-full">
+    <div className=" -mt-4 md:mt-0 flex flex-col md:flex-row bg-gray-100 h-full lg:pr-24 lg:pl-16">
       {/* Left side - Filters */}
       <div
         className={`w-full sm:px-28 px-10 md:w-1/3 md:px-4 lg:px-10 py-4 space-y-4`}
@@ -327,6 +313,7 @@ const TaskListPage = () => {
                         start: e.target.value,
                       }))
                     }
+                    className=""
                   />
                 </div>
                 <div className="p-2">
@@ -366,28 +353,38 @@ const TaskListPage = () => {
       </div>
 
       {/* Right side - Task List */}
-      <div className="w-full px-8 md:w-2/3 py-4 sm:px-4 max-h-1/2 md:max-h-[620px] overflow-y-auto">
-        <div className="space-y-4">
+      <div className="w-full px-2 md:w-2/3 py-4 sm:px-4 max-h-1/2 md:max-h-[620px] overflow-y-auto ">
+        <div className="space-y-4 p-0 sm:px-4">
           {tasks?.map((task: any) => (
             <div
               key={task.id}
-              className="bg-white p-4 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+              className={`bg-white p-4 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:scale-[1.02] border-t-[5px] ${getBorderColor(
+                task.priority
+              )}`}
             >
               <h3 className="text-lg font-semibold">{task.title}</h3>
               <p className="text-gray-600 italic">{task.description}</p>
               <div className="mt-2 flex justify-between items-center">
-                <div>
-                  <span className="text-sm text-gray-500">
-                    <span className="font-semibold text-gray-800">
-                      Priority
+                <div className="flex flex-col items-start gap-y-2">
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`text-xs font-medium px-2 py-1 rounded-full inline-flex items-center ${
+                        task.priority === "Low"
+                          ? "bg-green-100 text-green-800"
+                          : task.priority === "Medium"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {getPriorityIcon(task.priority)}
+                      <span className="ml-1">{task.priority}</span>
                     </span>
-                    : {task.priority}
-                  </span>
-                  <span className="text-sm text-gray-500 ml-2">
-                    <span className="font-semibold text-gray-800">Status</span>:{" "}
-                    {task.status}
-                  </span>
-                  <span className="text-sm text-gray-500 ml-2">
+                    <span className="text-gray-800 px-2 py-1 ml-2 text-xs bg-gray-200 font-semibold rounded-md">
+                      {task.status}
+                    </span>
+                  </div>
+
+                  <span className="text-sm text-gray-500">
                     <span className="font-semibold text-gray-800">Due</span>:{" "}
                     {formatDate(task.dueDate)}
                   </span>
@@ -398,8 +395,8 @@ const TaskListPage = () => {
                       <TooltipTrigger asChild>
                         <Button
                           onClick={() => {
+                            setUpTask(task);
                             setIsUpdateDialog(true);
-                            setTaskToUpdateId(task.id);
                           }}
                           variant="ghost"
                           size="sm"
@@ -422,7 +419,7 @@ const TaskListPage = () => {
                           size="sm"
                           className="transition-colors duration-300 hover:bg-gray-100"
                         >
-                          <Trash className="h-4 w-4" />
+                          <Trash className=" text-red-600 h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -434,14 +431,16 @@ const TaskListPage = () => {
               </div>
             </div>
           ))}
+
           <div>
-            {
+            {upTask?.id && (
               <UpdateTaskDialog
                 isOpen={isUpdateDialog}
                 setOnClose={() => setIsUpdateDialog(false)}
                 onUpdate={handleEditTask}
+                task={upTask}
               />
-            }
+            )}
           </div>
         </div>
       </div>

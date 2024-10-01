@@ -1,6 +1,7 @@
 "use client";
 
 import useSignInModal from "@/hooks/useSignInModal";
+import { BASE_URL } from "@/lib/utils";
 import { taskState } from "@/recoilAtoms/taskAtom";
 import { userIdState } from "@/recoilAtoms/userAtom";
 import axios from "axios";
@@ -26,7 +27,7 @@ const Navbar = () => {
     }
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/user/logout",
+        `${BASE_URL}/api/user/logout`,
         {},
         { withCredentials: true }
       );
@@ -60,13 +61,13 @@ const Navbar = () => {
           </Link>
           <nav className="ml-auto flex gap-4 sm:gap-6 items-center">
             <Link
-              className="text-sm font-medium hover:underline underline-offset-4"
+              className="text-sm hidden sm:block font-medium hover:underline underline-offset-4"
               href="#"
             >
               Features
             </Link>
             <Link
-              className="text-sm font-medium hover:underline underline-offset-4"
+              className="text-sm hidden sm:block font-medium hover:underline underline-offset-4"
               href="#"
             >
               Pricing

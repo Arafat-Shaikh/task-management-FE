@@ -16,14 +16,10 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { taskState } from "@/recoilAtoms/taskAtom";
 import axios from "axios";
 import { userIdState } from "@/recoilAtoms/userAtom";
-
-type Task = {
-  id: string;
-  title: string;
-  description: string;
-  status: "To do" | "In Progress" | "Completed";
-  priority: "Low" | "Medium" | "High";
-};
+import { getColumnColor, getPriorityIcon } from "@/lib/icons";
+import { Task } from "@/lib/types";
+import { BASE_URL } from "@/lib/utils";
+import { useTaskDeletion } from "@/hooks/useTaskDeletion";
 
 const TaskCard: React.FC<{
   task: Task;
@@ -36,19 +32,7 @@ const TaskCard: React.FC<{
       isDragging: !!monitor.isDragging(),
     }),
   }));
-
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case "Low":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case "Medium":
-        return <Clock className="h-4 w-4 text-yellow-500" />;
-      case "High":
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
-      default:
-        return null;
-    }
-  };
+  const { isDeleting, handleDeleteTask } = useTaskDeletion();
 
   const setDragRef = (element: HTMLDivElement | null) => {
     if (element) {
@@ -78,9 +62,11 @@ const TaskCard: React.FC<{
           <span className="ml-1">{task.priority}</span>
         </span>
       </div>
-      <p className="text-gray-600 text-sm mb-3">{task.description}</p>
+      <p className="text-gray-600 text-sm mb-3 italic">{task.description}</p>
       <div className="flex justify-between items-center">
-        <span className="text-xs text-gray-500">{task.status}</span>
+        <span className="text-xs text-gray-700 px-2 py-1.5 bg-gray-100 rounded-md font-semibold">
+          {task.status}
+        </span>
         <div>
           <Button
             variant="ghost"
@@ -90,6 +76,7 @@ const TaskCard: React.FC<{
             <Edit className="h-4 w-4" />
           </Button>
           <Button
+            onClick={() => handleDeleteTask(task.id)}
             variant="ghost"
             size="sm"
             className="text-red-600 hover:text-red-800 hover:bg-red-100"
@@ -111,19 +98,6 @@ const Column: React.FC<{
     accept: "task",
     drop: (item: { id: string }) => onStatusChange(item.id, status),
   }));
-
-  const getColumnColor = (status: string) => {
-    switch (status) {
-      case "To do":
-        return "bg-blue-50 border-blue-200";
-      case "In Progress":
-        return "bg-yellow-50 border-yellow-200";
-      case "Completed":
-        return "bg-green-50 border-green-200";
-      default:
-        return "bg-gray-50 border-gray-200";
-    }
-  };
 
   const setDropRef = (element: HTMLDivElement | null) => {
     if (element) {
@@ -161,7 +135,7 @@ export default function KanbanDashboard() {
   const handleStatusChange = async (id: string, newStatus: Task["status"]) => {
     try {
       const response = await axios.put(
-        `http://localhost:8080/api/task/${id.toString()}`,
+        `${BASE_URL}/api/task/${id.toString()}`,
         { status: newStatus.toString() },
         { withCredentials: true }
       );
@@ -187,7 +161,7 @@ export default function KanbanDashboard() {
     async function getTasks() {
       if (userId) {
         try {
-          const response = await axios.get("http://localhost:8080/api/task", {
+          const response = await axios.get(`${BASE_URL}/api/task`, {
             withCredentials: true,
           });
           const tasks = response.data;

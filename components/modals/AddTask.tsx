@@ -23,19 +23,18 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { BASE_URL, cn } from "@/lib/utils";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import useAddTaskModal from "@/hooks/useAddTaskModal";
-import { title } from "process";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useRecoilState } from "recoil";
 import { taskState } from "@/recoilAtoms/taskAtom";
+import { formatDate, Task } from "@/lib/types";
 
 enum StatusType {
   ToDo = "To do",
@@ -49,22 +48,14 @@ enum PriorityType {
   High = "High",
 }
 
-type Task = {
-  title: string;
-  description: string;
-  status: string | undefined;
-  priority: string | undefined;
-  dueDate: Date | undefined;
-};
-
 const AddTaskModal = () => {
   const addTaskModal = useAddTaskModal();
   const [isLoading, setIsLoading] = useState(false);
   const [newTask, setNewTask] = useState<Task>({
     title: "",
     description: "",
-    status: "",
-    priority: "",
+    status: StatusType.ToDo,
+    priority: PriorityType.Medium,
     dueDate: undefined,
   });
   const [tasks, setTasks] = useRecoilState(taskState);
@@ -82,14 +73,14 @@ const AddTaskModal = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/task",
-        newTask,
-        { withCredentials: true }
-      );
+      const response = await axios.post(`${BASE_URL}/api/task`, newTask, {
+        withCredentials: true,
+      });
 
       if (response.data) {
         setTasks((prevTasks: any) => [response.data, ...prevTasks]);
+
+        setNewTask((prevTask) => ({ ...prevTask, title: "", description: "" }));
       }
       addTaskModal.onClose();
     } catch (err) {
@@ -145,15 +136,18 @@ const AddTaskModal = () => {
               </Label>
               <Select
                 value={newTask.status}
-                onValueChange={(value: "To Do" | "In Progress" | "Completed") =>
-                  setNewTask({ ...newTask, status: value })
-                }
+                onValueChange={(
+                  value:
+                    | StatusType.ToDo
+                    | StatusType.InProgress
+                    | StatusType.Completed
+                ) => setNewTask({ ...newTask, status: value })}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={StatusType.ToDo}>To Do</SelectItem>
+                  <SelectItem value={StatusType.ToDo}>To do</SelectItem>
                   <SelectItem value={StatusType.InProgress}>
                     In Progress
                   </SelectItem>
@@ -198,7 +192,7 @@ const AddTaskModal = () => {
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {newTask.dueDate ? (
-                      format(newTask.dueDate, "PPP")
+                      formatDate(newTask.dueDate)
                     ) : (
                       <span>Pick a date</span>
                     )}

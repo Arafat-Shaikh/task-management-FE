@@ -36,7 +36,7 @@ export default function RootLayout({
         <Provider>
           <Modals />
           <Navbar />
-          <div className="h-full max-w-[2520px] mx-auto pt-20 px-2 sm:px-3 md:px-4 lg:px-6">
+          <div className="h-full max-w-[2520px] mx-auto pt-20 px-2 sm:px-3 md:px-4 ">
             {children}
           </div>
         </Provider>

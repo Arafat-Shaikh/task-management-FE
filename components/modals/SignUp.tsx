@@ -19,6 +19,7 @@ import { useRecoilState } from "recoil";
 import { userIdState } from "@/recoilAtoms/userAtom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { BASE_URL } from "@/lib/utils";
 
 interface SignUpType {
   name: string;
@@ -49,7 +50,7 @@ const SignUp = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/user/signup",
+        `${BASE_URL}/api/user/signup`,
         userDetails,
         { withCredentials: true }
       );
