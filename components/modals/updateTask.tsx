@@ -9,7 +9,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -79,7 +78,7 @@ export default function UpdateTaskDialog({
         <DialogHeader>
           <DialogTitle>Edit Task</DialogTitle>
           <DialogDescription>
-            Make changes to your task here. Click save when you're done.
+            Make changes to your task here. Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>

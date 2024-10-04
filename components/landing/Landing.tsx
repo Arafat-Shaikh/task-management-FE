@@ -1,19 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Button } from "../ui/button";
-import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { CheckCircle, ListTodo, Share2, Zap } from "lucide-react";
+import { CheckCircle, Share2, Zap } from "lucide-react";
 import useSignInModal from "@/hooks/useSignInModal";
 import { useRouter } from "next/navigation";
-import { useRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 import { userIdState } from "@/recoilAtoms/userAtom";
 
 const Landing = () => {
-  const { isOpen, onOpen } = useSignInModal();
+  const { onOpen } = useSignInModal();
   const router = useRouter();
-  const [userId, setUserId] = useRecoilState(userIdState);
+  const userId = useRecoilValue(userIdState);
 
   return (
     <div className="flex flex-col">

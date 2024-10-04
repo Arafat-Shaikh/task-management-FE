@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import { RecoilRoot } from "recoil";
 import ClientOnly from "@/components/Clientonly";
 import { Toaster } from "react-hot-toast";

@@ -6,9 +6,9 @@ export type Task = {
   status: "To do" | "In Progress" | "Completed";
   dueDate: Date | undefined;
 };
-
-export function formatDate(isoDateString: any) {
-  const date = new Date(isoDateString);
+// @ts-nocheck
+export function formatDate(isDateString: any) {
+  const date = new Date(isDateString?.toString());
   return date.toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "2-digit",

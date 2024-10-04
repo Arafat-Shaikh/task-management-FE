@@ -31,14 +31,13 @@ import {
 import toast from "react-hot-toast";
 import UpdateTaskDialog from "@/components/modals/updateTask";
 import { getBorderColor, getPriorityIcon } from "@/lib/icons";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDate, Task } from "@/lib/types";
 import { useTaskDeletion } from "@/hooks/useTaskDeletion";
 import { BASE_URL } from "@/lib/utils";
 
 const TaskListPage = () => {
   const [isUpdateDialog, setIsUpdateDialog] = useState(false);
-  const { isDeleting, handleDeleteTask } = useTaskDeletion();
+  const { handleDeleteTask } = useTaskDeletion();
   const userId = useRecoilValue(userIdState);
   const [tasks, setTasks] = useRecoilState(taskState);
   const [priorityFilter, setPriorityFilter] = useState<string | null>(null);
@@ -111,7 +110,7 @@ const TaskListPage = () => {
       return router.push("/");
     }
   }, []);
-
+  // @ts-ignore
   async function handleEditTask(updateTask: any) {
     console.log(updateTask.dueDate);
     console.log(new Date(updateTask.dueDate));
@@ -130,7 +129,7 @@ const TaskListPage = () => {
       );
       if (response.data) {
         console.log(upTask);
-        setTasks((prevTasks: any) =>
+        setTasks((prevTasks: Task[]) =>
           prevTasks.map((t: Task) =>
             t.id?.toString() === upTask?.id ? updateTask : t
           )
@@ -355,7 +354,7 @@ const TaskListPage = () => {
       {/* Right side - Task List */}
       <div className="w-full px-2 md:w-2/3 py-4 sm:px-4 max-h-1/2 md:max-h-[620px] overflow-y-auto ">
         <div className="space-y-4 p-0 sm:px-4">
-          {tasks?.map((task: any) => (
+          {tasks?.map((task: Task) => (
             <div
               key={task.id}
               className={`bg-white p-4 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:scale-[1.02] border-t-[5px] ${getBorderColor(

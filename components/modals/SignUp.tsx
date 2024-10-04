@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FormEventHandler, useState } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,7 @@ import { Input } from "../ui/input";
 import useSignInModal from "@/hooks/useSignInModal";
 import { useRouter } from "next/navigation";
 import useSignupModal from "@/hooks/useSignupModal";
-import { useRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import { userIdState } from "@/recoilAtoms/userAtom";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -30,7 +30,7 @@ interface SignUpType {
 const SignUp = () => {
   const signUpModal = useSignupModal();
   const signInModal = useSignInModal();
-  const [userId, setUserId] = useRecoilState(userIdState);
+  const setUserId = useSetRecoilState(userIdState);
   const router = useRouter();
   const [userDetails, setUserDetails] = useState<SignUpType>({
     name: "",
@@ -67,6 +67,7 @@ const SignUp = () => {
       }
     } catch (error) {
       toast.error("Something went wrong");
+      console.log(error);
     }
 
     setIsLoading(false);
@@ -137,7 +138,7 @@ const SignUp = () => {
                 Sign up
               </Button>
               <p className="text-sm">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <span
                   onClick={handleModalSwitch}
                   className="hover:underline cursor-pointer"

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,7 @@ import { Input } from "../ui/input";
 import useSignInModal from "@/hooks/useSignInModal";
 import { useRouter } from "next/navigation";
 import useSignupModal from "@/hooks/useSignupModal";
-import { useRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import { userIdState } from "@/recoilAtoms/userAtom";
 import axios from "axios";
 import { BASE_URL } from "@/lib/utils";
@@ -29,7 +29,7 @@ const SignIn = () => {
   const signInModal = useSignInModal();
   const router = useRouter();
   const signUpModal = useSignupModal();
-  const [userId, setUserId] = useRecoilState(userIdState);
+  const setUserId = useSetRecoilState(userIdState);
   const [userDetails, setUserDetails] = useState<SignInType>({
     email: "",
     password: "",
@@ -115,7 +115,7 @@ const SignIn = () => {
                   Sign In
                 </Button>
                 <p className="text-sm">
-                  Don't have an account?{" "}
+                  Don&apos;t have an account?{" "}
                   <span
                     onClick={toggle}
                     className="hover:underline cursor-pointer"

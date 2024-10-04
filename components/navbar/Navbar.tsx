@@ -2,7 +2,6 @@
 
 import useSignInModal from "@/hooks/useSignInModal";
 import { BASE_URL } from "@/lib/utils";
-import { taskState } from "@/recoilAtoms/taskAtom";
 import { userIdState } from "@/recoilAtoms/userAtom";
 import axios from "axios";
 import { ListTodo, LogOut } from "lucide-react";
@@ -16,7 +15,7 @@ const Navbar = () => {
   const signInModal = useSignInModal();
   const [userId, setUserId] = useRecoilState(userIdState);
   const [isLoading, setIsLoading] = useState(false);
-  const [tasks, setTasks] = useRecoilState(taskState);
+  // const [tasks, setTasks] = useRecoilState(taskState);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -41,6 +40,7 @@ const Navbar = () => {
       router.push("/");
     } catch (error) {
       toast.error("Something went wrong while logging out");
+      console.log(error);
     }
   };
 

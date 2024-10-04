@@ -1,17 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Button } from "@/components/ui/button";
-import {
-  Edit,
-  Trash,
-  Plus,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-} from "lucide-react";
+import { Edit, Trash } from "lucide-react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { taskState } from "@/recoilAtoms/taskAtom";
 import axios from "axios";
@@ -24,7 +17,7 @@ import { useTaskDeletion } from "@/hooks/useTaskDeletion";
 const TaskCard: React.FC<{
   task: Task;
   onStatusChange: (id: string, status: Task["status"]) => void;
-}> = ({ task, onStatusChange }) => {
+}> = ({ task }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "task",
     item: { id: task.id },
@@ -32,7 +25,7 @@ const TaskCard: React.FC<{
       isDragging: !!monitor.isDragging(),
     }),
   }));
-  const { isDeleting, handleDeleteTask } = useTaskDeletion();
+  const { handleDeleteTask } = useTaskDeletion();
 
   const setDragRef = (element: HTMLDivElement | null) => {
     if (element) {
@@ -94,7 +87,7 @@ const Column: React.FC<{
   tasks: Task[];
   onStatusChange: (id: string, status: Task["status"]) => void;
 }> = ({ status, tasks, onStatusChange }) => {
-  const [, drop] = useDrop<any>(() => ({
+  const [, drop] = useDrop<{ id: string; type: string }>(() => ({
     accept: "task",
     drop: (item: { id: string }) => onStatusChange(item.id, status),
   }));
@@ -146,8 +139,8 @@ export default function KanbanDashboard() {
       // console.log(fetchTasks.data);
 
       if (response.data) {
-        setTasks((prevTasks: any) =>
-          prevTasks.map((task: any) =>
+        setTasks((prevTasks: Task[]) =>
+          prevTasks.map((task: Task) =>
             task.id === id ? { ...task, status: newStatus } : task
           )
         );
