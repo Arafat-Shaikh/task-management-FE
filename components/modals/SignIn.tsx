@@ -19,6 +19,7 @@ import { useSetRecoilState } from "recoil";
 import { userIdState } from "@/recoilAtoms/userAtom";
 import axios from "axios";
 import { BASE_URL } from "@/lib/utils";
+import toast from "react-hot-toast";
 
 interface SignInType {
   email: string;
@@ -53,16 +54,22 @@ const SignIn = () => {
       );
 
       const data = response.data;
-      console.log(data.userId);
+
       if (data.userId) {
         localStorage.setItem("user-unique-id", data.userId);
-
         setUserId(data.userId);
-        signInModal.onClose();
         router.push("/task");
+        signInModal.onClose();
+        toast.success("Login successful");
+      } else {
+        toast.error(data.message);
       }
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      if (error.status == 403) {
+        toast.error("User not found");
+      } else {
+        toast.error("Something went wrong");
+      }
     }
   };
 

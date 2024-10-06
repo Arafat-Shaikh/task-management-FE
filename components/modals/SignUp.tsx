@@ -54,20 +54,26 @@ const SignUp = () => {
         userDetails,
         { withCredentials: true }
       );
-      if (!response.data) {
-        alert("Something went wrong while Signing up");
-      }
+
       const data = response.data;
+      console.log(data);
 
       if (data.userId) {
         localStorage.setItem("user-unique-id", data.userId);
         setUserId(data.userId);
-        signUpModal.onClose();
         router.push("/task");
+      } else {
+        toast.error(data.message);
+        console.log(data);
       }
-    } catch (error) {
-      toast.error("Something went wrong");
-      console.log(error);
+    } catch (error: any) {
+      if (error.status == 403) {
+        toast.error("User already exist");
+      } else {
+        toast.error("Something went wrong");
+      }
+    } finally {
+      signUpModal.onClose();
     }
 
     setIsLoading(false);

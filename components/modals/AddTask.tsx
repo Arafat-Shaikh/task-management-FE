@@ -86,6 +86,7 @@ const AddTaskModal = () => {
         }));
       }
       addTaskModal.onClose();
+      toast.success("Task created successfully");
     } catch (err) {
       console.log(err);
       toast.error("Something went wrong");

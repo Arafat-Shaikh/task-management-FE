@@ -137,6 +137,7 @@ const TaskListPage = () => {
       }
       setIsLoading(false);
       setIsUpdateDialog(false);
+      toast.success("Task updated successfully");
     } catch (error) {
       console.log(error);
       toast.error("Cant update the Task");
