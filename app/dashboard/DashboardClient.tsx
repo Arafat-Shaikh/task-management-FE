@@ -55,7 +55,9 @@ const TaskCard: React.FC<{
           <span className="ml-1">{task.priority}</span>
         </span>
       </div>
-      <p className="text-gray-600 text-sm mb-3 italic">{task.description}</p>
+      <p className="text-gray-600 italic text-sm font-medium tracking-wide">
+        {task.description}
+      </p>
       <div className="flex justify-between items-center">
         <span className="text-xs text-gray-700 px-2 py-1.5 bg-gray-100 rounded-md font-semibold">
           {task.status}

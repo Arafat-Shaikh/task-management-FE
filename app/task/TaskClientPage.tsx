@@ -341,7 +341,10 @@ const TaskListPage = () => {
               )}`}
             >
               <h3 className="text-lg font-semibold">{task.title}</h3>
-              <p className="text-gray-600 italic text-xs">{task.description}</p>
+              <p className="text-gray-600 italic text-sm font-medium tracking-wide">
+                {task.description}, This is web designing task needs to be
+                completed before deadline at any cost
+              </p>
               <div className="mt-2 flex justify-between items-center">
                 <div className="flex flex-col items-start gap-y-2">
                   <div className="flex items-center justify-between">
