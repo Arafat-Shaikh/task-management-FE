@@ -153,27 +153,6 @@ const TaskListPage = () => {
     });
   }
 
-  // async function handleDeleteTask(taskId: string) {
-  //   if (isLoading) {
-  //     return;
-  //   }
-
-  //   setIsLoading(true);
-  //   try {
-  //     const response = await axios.delete(`${BASE_URL}/api/task/${taskId}`, {
-  //       withCredentials: true,
-  //     });
-  //     if (response.data) {
-  //       setTasks((prevTasks) => prevTasks.filter((t) => t.id !== taskId));
-  //     }
-  //     setIsLoading(false);
-  //   } catch (error) {
-  //     console.log(error);
-  //     toast.error("Something went wrong while delete the task");
-  //   }
-  //   setIsLoading(false);
-  // }
-
   if (!userId) {
     return null;
   }
@@ -362,7 +341,7 @@ const TaskListPage = () => {
               )}`}
             >
               <h3 className="text-lg font-semibold">{task.title}</h3>
-              <p className="text-gray-600 italic">{task.description}</p>
+              <p className="text-gray-600 italic text-xs">{task.description}</p>
               <div className="mt-2 flex justify-between items-center">
                 <div className="flex flex-col items-start gap-y-2">
                   <div className="flex items-center justify-between">
@@ -384,8 +363,13 @@ const TaskListPage = () => {
                   </div>
 
                   <span className="text-sm text-gray-500">
-                    <span className="font-semibold text-gray-800">Due</span>:{" "}
-                    {formatDate(task.dueDate)}
+                    <span className="font-semibold text-gray-800">
+                      Deadline
+                    </span>
+                    :{" "}
+                    <span className="text-xs font-semibold text-amber-800">
+                      {formatDate(task.dueDate)}
+                    </span>
                   </span>
                 </div>
                 <div>
@@ -399,7 +383,7 @@ const TaskListPage = () => {
                           }}
                           variant="ghost"
                           size="sm"
-                          className="transition-colors duration-300 hover:bg-gray-100"
+                          className="mr-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -416,7 +400,7 @@ const TaskListPage = () => {
                           onClick={() => handleDeleteTask(task.id)}
                           variant="ghost"
                           size="sm"
-                          className="transition-colors duration-300 hover:bg-gray-100"
+                          className="transition-colors duration-300 hover:bg-red-100"
                         >
                           <Trash className=" text-red-600 h-4 w-4" />
                         </Button>
